@@ -1,6 +1,17 @@
-#include "TRANSMITORSIMU.h"
+#include <stdlib.h>
+#include "TransmitorSimu.h"
 
-int TranSimu_init(key_t key){
+
+
+message_buf sbuf;
+message_buf rbuf;
+int msqid;
+size_t buf_length;
+
+
+
+int TranSimu_init(key_t key, int msgflg){
+    
     if ((msqid = msgget(key, msgflg )) < 0) {
         perror("msgget");
         return 1;
@@ -23,7 +34,7 @@ int TranSimu_send(char* message){
         buf_length = strlen(message) + 1;
     }
     if (msgsnd(msqid, &sbuf, buf_length, IPC_NOWAIT) < 0) {
-       printf ("%d, %d, %s, %d\n", msqid, sbuf.mtype, sbuf.mtext, buf_length);
+       printf ("%d, %ld, %s, %d\n", msqid, sbuf.mtype, sbuf.mtext, (int)buf_length);
         perror("msgsnd");
         return 1;
     }
@@ -34,7 +45,7 @@ int TranSimu_send(char* message){
 }
 
 int TranSimu_dirsend(key_t key, char* message){
-    if(TranSimu_init(key)){
+    if(TranSimu_init(key,SENDERFLG)){
         return 1;
     }
     if(TranSimu_send(message)){
@@ -44,7 +55,7 @@ int TranSimu_dirsend(key_t key, char* message){
 }
 
 
-int Transimu_rec(char *message){
+int TranSimu_rec(char *message){
     if (msgrcv(msqid, &rbuf, MSGSZ, 1, 0) < 0) {
         perror("msgrcv");
         exit(1);
@@ -53,11 +64,11 @@ int Transimu_rec(char *message){
     return 0;
 }
 
-int Transimu_recLoop(int sleepTime){
+int TranSimu_recLoop(int sleepTime){
     char message[MSGSZ];
     while(1){
-        Transimu_rec(message);
-        printf("%s\n, message");
+        TranSimu_rec(message);
+        printf("%s\n", message);
         sleep(sleepTime);
     }
     return 0;

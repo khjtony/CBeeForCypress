@@ -1,7 +1,8 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include <project.h>
+#include <stdio.h>
+#include <stdint.h>
 
 // SD queue should be longer than can queue
 #define CAN_QUEUE_LENGTH 32
