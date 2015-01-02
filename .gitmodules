@@ -1,0 +1,3 @@
+[submodule "xbee-arduino"]
+	path = xbee-arduino
+	url = https://code.google.com/p/xbee-arduino/
