@@ -2,7 +2,7 @@
 #define CBeeArduinoLib_H
 
 #include "Arduino"
-
+#include <inttypes.h>
 
 //*************************************************//
 //					API Frame names & ID
@@ -26,6 +26,28 @@
 #define		RUT_REC_IND		0xA1		//Route Record indicator
 #define		MANY_TO_ONE_IND	0xA3		//Many to one route request indicator
 
+//*************************************************//
+//					Command reference table
+//*************************************************//
+
+
+typedef struct {
+	Byte api_id;
+	Byte api_len_H;
+	Byte api_len_L;
+	Byte api_self64Add[8];
+	Byte api_self16Add[2];
+	Byte api_tar64Add[8];
+	Byte api_tar16Add[2];
+	Byte api_frameType;
+	Byte api_frameID;
+	Byte api_LOL;
+
+	char* (*_getAllChar)(struct Xbee*);
+	XBee_Txrequest
+
+}XBee_construct;
+
 
 typedef struct _apiFrameUnion{
 	Byte api_id;
@@ -45,7 +67,7 @@ void _escapeCheck();
 void _calChecksum();
 void _verifyChecksum();
 int  _msgLength();
-
+void _send();
 
 
 
