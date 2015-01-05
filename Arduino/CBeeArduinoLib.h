@@ -3,13 +3,19 @@
 
 #include "Arduino"
 #include <inttypes.h>
+//*************************************************//
+//					 Some constant
+//*************************************************//
+#define		START_CHAR		0x7E
+#define		ESCAPE_CHAR		0x11
+#define		ZISE_OF_UINT8_T	0xFF
 
 //*************************************************//
 //					API Frame names & ID
 //*************************************************//
 #define		AT_CMD			0x08		//AT command
 #define		AT_CMD_QPV		0x09		//AT command--queue parameter value
-#define		ZB_TM_RQ		0X10		//ZigBee Transmit Request	
+#define		ZB_TX_RQ		0X10		//ZigBee Transmit Request	
 #define 	ZB_ADD_CMD		0X11		//Explicit Add ZigBee command Frame
 #define 	RMT_CMD_RQ		0X17		//Remote Command Remote request
 #define		CRT_SRC_RUT		0X21		//Create Source Route
@@ -30,48 +36,88 @@
 //					Command reference table
 //*************************************************//
 
+//need a function read string and return byte*
+uint8_t _get_char_len(char*);
+uint8_t _get_Byte_len(Byte*);
 
-typedef struct {
-	Byte api_id;
-	Byte api_len_H;
-	Byte api_len_L;
-	Byte api_self64Add[8];
-	Byte api_self16Add[2];
-	Byte api_tar64Add[8];
-	Byte api_tar16Add[2];
-	Byte api_frameType;
-	Byte api_frameID;
+
+
+typedef struct XBee_t{
+	Byte api_pan;
+	Byte api_self64_addr[8];
+	Byte api_self16_addr[2];
 	Byte api_LOL;
-
-	char* (*_getAllChar)(struct Xbee*);
-	XBee_Txrequest
-
-}XBee_construct;
-
-
-typedef struct _apiFrameUnion{
-	Byte api_id;
-	Byte api_len_L;
-	Byte api_len_H;
-	Byte*api_data;
-	Byte api_frameType;
-	Byte api_frameID;
-	Byte api_checksum;
-	Byte api_hdAdd[8];
-	Byte api_netAdd[2];
-	Byte*api_pkg;
-} XBeeDataPKG;
-
-
-void _escapeCheck();
-void _calChecksum();
-void _verifyChecksum();
-int  _msgLength();
-void _send();
+	char* (*_get_all_char)(struct XBee_t*);
+	struct XBee_request_t* xbee_request;
+	struct XBee_response_t* xbee_response;
+	uint8_t (*_frame_compile)(struct XBee_t*);
+	void (*_set_XBee_addr64)(struct XBee_t* , char*);
+	void (*_set_request)(struct XBee_init*, struct XBee_request_t*);
+}XBee;  //need a initiator
+void XBee_init();  
+uint8_t (*frame_compile)(struct XBee_t*);		//may not need this function, because get all char it self should do the compile job
+char* (*get_all_char)(struct XBee_t* this);
+void (*set_XBee_addr64)(struct XBee_t* , char*);
+void (*set_request)(struct XBee_init*, struct XBee_request_t*);
 
 
 
+typedef struct XBee_request_t{
+	Byte api_frame_len_H;
+	Byte api_frame_len_L;
+	Byte api_frame_type;
+	Byte api_frame_id;
+	Byte api_tar64_addr[8];
+	Byte api_tar16_addr[2];
+	Byte* api_content;
+	
+	//these functions are not neccessary but incase for using
+	uint8_t (*_get_frame_length)(struct XBee_request_t*);
+	
+	void (*_set_target_addr)(struct XBee_request_t*, Byte*);
+	void (*_append_content)(struct XBee_request_t*, Byte*);
+	void (*_addn_content)(struct XBee_request_t*, Byte*);
 
+	//functions below are tons of avaliable cmd: addr64,addr16,broadcast radius,options,data. ALSO DO LENGTH CHECK
+	void (*_ZB_TX_RQ)(struct XBee_request_t*, struct XBee_addr64, struct XBee_addr16, Byte,Byte,char*);
+
+}XBee_request;	//This struct receives target add,
+void XBee_request_init();
+uint8_t (*get_frame_length)(struct XBee_request_t*);
+void (*set_target_addr)(struct XBee_request_t*, Byte*);
+void (*append_content)(struct XBee_request_t*, Byte*);
+void (*addn_content)(struct XBee_request_t*, Byte*);
+//functions below are tons of avaliable cmd: addr64,addr16,broadcast radius,options,data. ALSO DO LENGTH CHECK
+void (*ZB_TX_RQ)(struct XBee_request_t*, struct XBee_addr64, struct XBee_addr16, Byte,Byte,char*);
+
+
+
+
+typedef struct XBee_addr64_t{
+	Byte api_frame_addr[8];
+	void (*_set_addr)(struct XBee_addr64_t* , char*);
+} XBee_addr64;
+void XBee_addr64_init();
+void (*set_addr64)(struct XBee_addr64_t* , char*);
+
+
+typedef struct XBee_addr16_t{
+	Byte api_frame_addr[2];
+	void (*_set_addr)(struct XBee_addr16_t* , char*);
+} XBee_addr16;
+void XBee_addr16_init();
+void (*set_addr16)(struct XBee_addr16_t* , char*);
+
+
+typedef struct XBee_addr_t{
+	Byte api_frame_addr64[8];
+	Byte api_frame_addr16[2];
+	void (*_set_addr)(struct XBee_addr_t* , char*,char*);
+} XBee_addr;
+void XBee_addr_init();
+void (*set_all_addr)(struct XBee_addr_t* , char*,char*);
+
+#endif
 
 
 
