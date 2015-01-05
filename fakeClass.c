@@ -19,7 +19,7 @@ typedef struct fakeClass_t{
 	void (*_append_content)(struct fakeClass_t*,char*);
 } fakeClass;
 
-int growUp(struct fakeClass_t* this){
+int (growUp)(struct fakeClass_t* this){
 	this->age++;
 	return this->age;
 }
@@ -47,6 +47,7 @@ void append_content(struct fakeClass_t* this, char* msg){
 		for (i=0;i<msg_len;i++){
 			temp[i+old_len]=msg[i];
 		}
+		temp[new_len-1]='\0';
 		this->content=temp;
 		temp=NULL;
 	}
@@ -55,7 +56,7 @@ void append_content(struct fakeClass_t* this, char* msg){
 
 void _fakeClass_init(struct fakeClass_t* this){
 	this->content=NULL;
-	this->grow=&growUp;
+	this->grow=growUp;
 	this->_append_content=append_content;
 	return;
 }
