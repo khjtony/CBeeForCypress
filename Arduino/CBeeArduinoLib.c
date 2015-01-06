@@ -35,19 +35,29 @@ void XBee_init(struct XBee_t* this){
 	this->_get_all_char=&get_all_char;
 	this->_frame_compile=&frame_compile;
 	this->_set_XBee_addr64=&set_XBee_addr64;
+	this->_set_request=&set_request;
 }
+
 uint8_t (frame_compile)(struct XBee_t* this){return;}		//may not need this function, because get all char it self should do the compile job
-char* (get_all_char)(struct XBee_t* this){
+Byte* (get_all_char)(struct XBee_t* this){
 	uint8_t i=0;
-	this->all_len=3+this->xbee_request->data_len+1;
+	this->all_len=3+((this->xbee_request)->data_len)+1;
 	this->api_all=(Byte*)malloc(sizeof(Byte)*(this->all_len));
 	this->api_all[0]=START_CHAR;
-	this->api_all[1]=(this->xbee_request->data_len)>>8;
-	this->api_all[2]=(this->xbee_request->data_len)&&0x00FF;
+	this->api_all[1]=(this->xbee_request->data_len)>>4;
+	this->api_all[2]=(this->xbee_request->data_len)&0x0F;
+	printf("All len is: %d\n", this->all_len);
 	for (i=0;i<this->xbee_request->data_len;i++){
 		this->api_all[i+3]=this->xbee_request->api_content[i];
 	}
-	this->api_all[this->all_len]=_checksum(this->xbee_request->api_content,this->xbee_request->data_len);
+	this->api_all[(this->all_len)-1]=_checksum(this->xbee_request->api_content,this->xbee_request->data_len);
+	printf("checksum is %#02x\n",this->api_all[this->all_len]);
+	i=0;
+	for (i=0;i<(this->all_len);i++){
+		printf("%#02x(%c)(%d) ", this->api_all[i],this->api_all[i],i);
+	}
+	printf("\n");
+
 	return this->api_all;
 }
 
@@ -58,8 +68,10 @@ void (set_XBee_addr64)(struct XBee_t* this, char* addr64){
 	 }
 	return;
 }
-void (set_request)(struct XBee_t* this, struct XBee_request_t* xbee_request){
-	this->xbee_request=xbee_request;
+void (set_request)(struct XBee_t* this, struct XBee_request_t* in_request){
+	// printf("prepare set request in %c to incoming request\n",in_request->api_content[5]);
+	this->xbee_request=in_request;
+
 	return;
 }
 
@@ -121,18 +133,21 @@ void (addn_content)(struct XBee_request_t* this, Byte* msg){
 //functions below are tons of avaliable cmd: addr64,addr16,broadcast radius,options,data. ALSO DO LENGTH CHECK
 void zb_tx_rq(struct XBee_request_t* this, struct XBee_addr64_t* addr64, struct XBee_addr16_t* addr16, Byte radius,Byte options,char* msg){
 	uint8_t msg_len=_get_Byte_len(msg);
+	this->data_len=1+1+8+2+1+1+msg_len;
 	uint8_t i=0;
+	this->api_content=(Byte*)malloc(sizeof(Byte)*(this->data_len));
 	this->api_frame_type=ZB_TX_RQ;
 	this->api_frame_id=0x01;
-	addr64->_copy_to(addr64,this->api_tar64_addr);
-	addr16->_copy_to(addr16,this->api_tar16_addr);
-	this->api_content=(Byte*)malloc(sizeof(Byte)*(msg_len+2));
-	this->api_content[0]=radius;
-	this->api_content[1]=options;
+	this->api_content[0]=ZB_TX_RQ;
+	this->api_content[1]=0x01;
+	addr64->_copy_to(addr64,(this->api_content)+2);
+	addr16->_copy_to(addr16,(this->api_content)+10);
+	this->api_content[12]=radius;
+	this->api_content[13]=options;
 	for(i=0;i<msg_len;i++){
-		this->api_content[i+2]=msg[i];
+		this->api_content[i+2+8+2+2]=msg[i];
 	}
-	this->data_len=1+1+8+2+1+1+msg_len;
+	printf("this->data_len = %d\n", this->data_len);
 	return;
 }
 

@@ -93,14 +93,14 @@ typedef struct XBee_t{
 
 	struct XBee_request_t* xbee_request;
 	struct XBee_response_t* xbee_response;
-	char* (*_get_all_char)(struct XBee_t*);
+	Byte* (*_get_all_char)(struct XBee_t*);
 	uint8_t (*_frame_compile)(struct XBee_t*);
 	void (*_set_XBee_addr64)(struct XBee_t* , char*);
 	void (*_set_request)(struct XBee_t*, struct XBee_request_t*);
 }XBee;  //need a initiator
 void XBee_init();  
 uint8_t (frame_compile)(struct XBee_t*);		//may not need this function, because get all char it self should do the compile job
-char* (get_all_char)(struct XBee_t* this);
+Byte* (get_all_char)(struct XBee_t* this);
 void (set_XBee_addr64)(struct XBee_t* , char*);
 void (set_request)(struct XBee_t*, struct XBee_request_t*);
 

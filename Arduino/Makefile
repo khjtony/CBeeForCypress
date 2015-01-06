@@ -1,10 +1,10 @@
 all: CBeeTest
 
-CBeeTest: cbeetest.o CBeeArduinoLib.o
-	gcc cbeetest.o CBeeArduinoLib.o -o CBeeTest
+CBeeTest: CBeeTest.o CBeeArduinoLib.o
+	gcc CBeeTest.o CBeeArduinoLib.o -o CBeeTest
 
-cbeetest.o: cbeetest.c
-	gcc -c cbeetest.c
+CBeeTest.o: CBeeTest.c
+	gcc -c CBeeTest.c
 
 CBeeArduinoLib.o: CBeeArduinoLib.h CBeeArduinoLib.c
 	gcc -c CBeeArduinoLib.c

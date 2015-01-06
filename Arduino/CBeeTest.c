@@ -7,6 +7,7 @@ int main(){
 	char addr[2];
 	addr[0]='a';
 	addr[1]='b';
+	Byte* backmsg;
 	Byte addr64_ar[8]={'t','h','i','s','i','s','a','d'};
 	XBee coordinator;
 	XBee_init(&coordinator);
@@ -18,10 +19,14 @@ int main(){
 	XBee_addr64 addr64;
 	XBee_addr64_init(&addr64);
 	addr64._set_addr(&addr64,addr64_ar);
+	// printf("prepare to create TXReq\n");
 	XBee_request TXReq;
-	XBee_request_init(TXReq);
+	XBee_request_init(&TXReq);
+	// printf("prepare to setup TXReq\n");
 	TXReq._zb_tx_rq(&TXReq,&addr64,&addr16,0x00,0x00,"I wanna see if this msg can be sent.");
+	printf("prepare to setup coordinator\n");
 	coordinator._set_request(&coordinator,&TXReq);
-	printf("This is after set request of xbee: %s\n",coordinator._get_all_char);
+	backmsg=coordinator._get_all_char(&coordinator);
+	printf("This is after set request of xbee: %s\n",backmsg);
 
 }
