@@ -44,30 +44,34 @@ typedef unsigned char Byte;
 //need a function read string and return byte*
 uint8_t _get_char_len(char*);
 uint8_t _get_Byte_len(Byte*);
+Byte 	_checksum(Byte*,uint8_t);
 
 typedef struct XBee_addr64_t{
 	Byte api_frame_addr[8];
-	void (*_set_addr)(struct XBee_addr64_t* , char*);
+	void (*_set_addr)(struct XBee_addr64_t* , Byte*);
+	void (*_copy_to)(struct XBee_addr64_t*, Byte*);
 } XBee_addr64;
 void XBee_addr64_init();
-void (set_addr64)(struct XBee_addr64_t* , char*);
-
+void (set_addr64)(struct XBee_addr64_t* , Byte*);
+void (copy64_to)(struct XBee_addr64_t*, Byte*);
 
 typedef struct XBee_addr16_t{
 	Byte api_frame_addr[2];
-	void (*_set_addr)(struct XBee_addr16_t* , char*);
+	void (*_set_addr)(struct XBee_addr16_t* , Byte*);
+	void (*_copy_to)(struct XBee_addr16_t*, Byte*);
 } XBee_addr16;
 void XBee_addr16_init();
-void (set_addr16)(struct XBee_addr16_t* , char*);
+void (set_addr16)(struct XBee_addr16_t* , Byte*);
+void (copy16_to)(struct XBee_addr16_t*, Byte*);
 
 
 typedef struct XBee_addr_t{
 	Byte api_frame_addr64[8];
 	Byte api_frame_addr16[2];
-	void (*_set_addr)(struct XBee_addr_t* , char*,char*);
+	void (*_set_addr)(struct XBee_addr_t* , Byte*,Byte*);
 } XBee_addr;
 void XBee_addr_init();
-void (set_all_addr)(struct XBee_addr_t* , char*,char*);
+void (set_all_addr)(struct XBee_addr_t* , Byte*,Byte*);
 
 
 
@@ -84,10 +88,12 @@ typedef struct XBee_t{
 	Byte api_pan;
 	Byte api_self64_addr[8];
 	Byte api_self16_addr[2];
-	Byte api_LOL;
-	char* (*_get_all_char)(struct XBee_t*);
+	Byte* api_all;
+	uint8_t all_len;
+
 	struct XBee_request_t* xbee_request;
 	struct XBee_response_t* xbee_response;
+	char* (*_get_all_char)(struct XBee_t*);
 	uint8_t (*_frame_compile)(struct XBee_t*);
 	void (*_set_XBee_addr64)(struct XBee_t* , char*);
 	void (*_set_request)(struct XBee_t*, struct XBee_request_t*);
@@ -108,6 +114,7 @@ typedef struct XBee_request_t{
 	Byte api_tar64_addr[8];
 	Byte api_tar16_addr[2];
 	Byte* api_content;
+	uint8_t data_len;   //length of frame-specific
 	
 	//these functions are not neccessary but incase for using
 	uint8_t (*_get_frame_length)(struct XBee_request_t*);
@@ -117,7 +124,7 @@ typedef struct XBee_request_t{
 	void (*_addn_content)(struct XBee_request_t*, Byte*);
 
 	//functions below are tons of avaliable cmd: addr64,addr16,broadcast radius,options,data. ALSO DO LENGTH CHECK
-	void (*_ZB_TX_RQ)(struct XBee_request_t*, struct XBee_addr64_t*, struct XBee_addr16_t*, Byte,Byte,char*);
+	void (*_zb_tx_rq)(struct XBee_request_t*, struct XBee_addr64_t*, struct XBee_addr16_t*, Byte,Byte,char*);
 
 }XBee_request;	//This struct receives target add,
 void XBee_request_init();
@@ -126,7 +133,7 @@ void (set_target_addr)(struct XBee_request_t*, Byte*);
 void (append_content)(struct XBee_request_t*, Byte*);
 void (addn_content)(struct XBee_request_t*, Byte*);
 //functions below are tons of avaliable cmd: addr64,addr16,broadcast radius,options,data. ALSO DO LENGTH CHECK
-void (ZB_TX_RQ_F)(struct XBee_request_t*, struct XBee_addr64_t*, struct XBee_addr16_t*, Byte,Byte,char*);
+void (zb_tx_rq)(struct XBee_request_t*, struct XBee_addr64_t*, struct XBee_addr16_t*, Byte,Byte,char*);
 
 
 
