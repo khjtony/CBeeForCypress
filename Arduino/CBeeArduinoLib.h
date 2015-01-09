@@ -4,7 +4,9 @@
 
 #include <inttypes.h>
 
+#ifndef __WIN32__
 typedef unsigned char Byte;
+#endif
 
 
 
